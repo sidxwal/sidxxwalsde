@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Study Group Comments</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        #comment-form {
+            margin-bottom: 20px;
+        }
+        #comment-input {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+        #comments {
+            margin-top: 20px;
+        }
+        .comment {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Virtual Study Group Comments</h1>
+    <div id="comment-form">
+        <textarea id="comment-input" placeholder="Enter your comment"></textarea><br>
+        <button onclick="postComment()">Post Comment</button>
+    </div>
+    <div id="comments"></div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+  apiKey: "AIzaSyC-rhGGkncLgQIYvKC0wP_jDnUztrXfdTU",
+  authDomain: "expanded-net-393009.firebaseapp.com",
+  projectId: "expanded-net-393009",
+  storageBucket: "expanded-net-393009.appspot.com",
+  messagingSenderId: "751867093183",
+  appId: "1:751867093183:web:6ce4469e6b1984beb5260a",
+  measurementId: "G-KDV46XN9ZS"
+};
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        console.log("Firebase Initialized:", app);
+
+        // Post comment function
+        function postComment() {
+            const commentInput = document.getElementById('comment-input').value;
+            if (commentInput) {
+                db.collection('comments').add({
+                    text: commentInput,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    document.getElementById('comment-input').value = '';
+                    console.log("Comment posted successfully");
+                }).catch((error) => {
+                    console.error("Error posting comment: ", error);
+                });
+            } else {
+                console.log("Comment input is empty");
+            }
+        }
+
+        // Load comments
+        db.collection('comments').orderBy('timestamp', 'asc').onSnapshot(snapshot => {
+            const commentsDiv = document.getElementById('comments');
+            commentsDiv.innerHTML = '';
+            snapshot.forEach(doc => {
+                const commentData = doc.data();
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'comment';
+                commentDiv.innerText = commentData.text;
+                commentsDiv.appendChild(commentDiv);
+            });
+        }, (error) => {
+            console.error("Error loading comments: ", error);
+        });
+    </script>
+</body>
+</html>
